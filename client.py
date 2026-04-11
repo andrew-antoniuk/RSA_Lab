@@ -1,13 +1,27 @@
+"""
+Docstring for client
+"""
+
 import socket
 import threading
 
 class Client:
+
+    """
+    Docstring for Client
+    """
+
     def __init__(self, server_ip: str, port: int, username: str) -> None:
         self.server_ip = server_ip
         self.port = port
         self.username = username
 
     def init_connection(self):
+
+        """
+        Docstring for init_connection
+        """
+
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.s.connect((self.server_ip, self.port))
@@ -28,18 +42,28 @@ class Client:
         input_handler = threading.Thread(target=self.write_handler,args=())
         input_handler.start()
 
-    def read_handler(self): 
+    def read_handler(self):
+
+        """
+        Docstring for read_handler
+        """
+
         while True:
             message = self.s.recv(1024).decode()
 
             # decrypt message with the secrete key
 
-            # ... 
+            # ...
 
 
             print(message)
 
     def write_handler(self):
+
+        """
+        Docstring for write_handler
+        """
+
         while True:
             message = input()
 

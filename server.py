@@ -1,7 +1,15 @@
+"""
+Docstring for server
+"""
+
 import socket
 import threading
 
 class Server:
+
+    """
+    Docstring for Server
+    """
 
     def __init__(self, port: int) -> None:
         self.host = '127.0.0.1'
@@ -11,6 +19,11 @@ class Server:
         self.s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
     def start(self):
+
+        """
+        Docstring for start
+        """
+
         self.s.bind((self.host, self.port))
         self.s.listen(100)
 
@@ -24,7 +37,7 @@ class Server:
             self.username_lookup[c] = username
             self.clients.append(c)
 
-            # send public key to the client 
+            # send public key to the client
 
             # ...
 
@@ -32,14 +45,19 @@ class Server:
 
             # ...
 
-            # send the encrypted secret to a client 
+            # send the encrypted secret to a client
 
             # ...
 
             threading.Thread(target=self.handle_client,args=(c,addr,)).start()
 
     def broadcast(self, msg: str):
-        for client in self.clients: 
+
+        """
+        Docstring for broadcast
+        """
+
+        for client in self.clients:
 
             # encrypt the message
 
@@ -47,7 +65,12 @@ class Server:
 
             client.send(msg.encode())
 
-    def handle_client(self, c: socket, addr): 
+    def handle_client(self, c: socket, addr):
+
+        """
+        Docstring for handle_client
+        """
+
         while True:
             msg = c.recv(1024)
 
