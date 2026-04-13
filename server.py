@@ -12,11 +12,11 @@ class Server:
     """
 
     def __init__(self, port: int) -> None:
-        self.host = '127.0.0.1'
+        self.host = "127.0.0.1"
         self.port = port
         self.clients = []
         self.username_lookup = {}
-        self.s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def start(self):
 
@@ -33,7 +33,7 @@ class Server:
             c, addr = self.s.accept()
             username = c.recv(1024).decode()
             print(f"{username} tries to connect")
-            self.broadcast(f'new person has joined: {username}')
+            self.broadcast(f"new person has joined: {username}")
             self.username_lookup[c] = username
             self.clients.append(c)
 
@@ -49,7 +49,7 @@ class Server:
 
             # ...
 
-            threading.Thread(target=self.handle_client,args=(c,addr,)).start()
+            threading.Thread(target = self.handle_client, args = (c,addr,)).start()
 
     def broadcast(self, msg: str):
 
