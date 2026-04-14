@@ -5,6 +5,7 @@ Server part
 import socket
 import threading
 from random import randint
+from time import sleep
 
 class Server:
 
@@ -36,22 +37,25 @@ class Server:
 
         while True:
             c, addr = self.s.accept()
-            username = c.recv(1024).decode()
+
+            username = c.recv(1024).decode("utf-8")
             print(f"{username} tries to connect")
 
             self.username_lookup[c] = username
             self.clients.append(c)
 
-            # send public key to the client
-            public_key = c.recv(1024).decode()
-            e, n = map(int, public_key.split(","))
+            # receive public key
+            public_key_data = c.recv(1024).decode("utf-8")
+            e, n = map(int, public_key_data.split(","))
             self.public_keys[c] = (e, n)
 
             # encrypt the secret with the clients public key
             encrypted = pow(self.secret_key, e, n)
 
             # send the encrypted secret to a client
-            c.send(str(encrypted).encode())
+            c.send(str(encrypted).encode("utf-8"))
+
+            sleep(0.1)
             self.broadcast(f"new person has joined: {username}")
 
             threading.Thread(target = self.handle_client, args = (c, addr,)).start()
@@ -65,8 +69,11 @@ class Server:
         for client in self.clients:
 
             # encrypt the message
-            encrypted_msg = "".join(chr(ord(ch) ^ self.secret_key) for ch in msg)
-            client.send(encrypted_msg.encode())
+            try:
+                encrypted_msg = "".join(chr(ord(ch) ^ self.secret_key) for ch in msg)
+                client.send(encrypted_msg.encode("utf-8")) # latin-1
+            except Exception:
+                self.clients.remove(client)
 
     def handle_client(self, c: socket, addr):
 

@@ -4,7 +4,8 @@ Client part
 
 import socket
 import threading
-from math import gcd # unused
+from time import sleep
+# from math import gcd # unused
 
 def extended_gcd(a: int, b: int):
 
@@ -33,6 +34,7 @@ class Client:
         self.server_ip = server_ip
         self.port = port
         self.username = username
+        self.secret_key = None
 
     def init_connection(self):
 
@@ -47,7 +49,8 @@ class Client:
             print("[client]: could not connect to server: ", e)
             return
 
-        self.s.send(self.username.encode())
+        self.s.send(self.username.encode("utf-8"))
+        sleep(0.1)
 
         # create key pairs
         p, q = 61, 53 # better to choose bigger
@@ -56,18 +59,15 @@ class Client:
         e = 17
         d = extended_gcd(e, phi)[1] % phi
 
-        # keys
-        self.public_key = (e, n)
-        self.private_key = (d, n)
-
         # exchange public keys
-        self.s.send(f"{e},{n}".encode())
+        self.s.send(f"{e},{n}".encode("utf-8"))
+
+
 
         # receive the encrypted secret key
-        data = self.s.recv(1024).decode()
+        data = self.s.recv(1024).decode("utf-8")
         print("Received secret:", data)
-        encrypted = int(data)
-        self.secret_key = pow(encrypted, d, n)
+        self.secret_key = pow(int(data), d, n)
 
         message_handler = threading.Thread(target = self.read_handler, args = ())
         message_handler.start()
@@ -81,11 +81,16 @@ class Client:
         """
 
         while True:
-            message = self.s.recv(1024).decode()
+            message = self.s.recv(1024).decode("utf-8") # latin-1
+
+            if not message:
+                break
 
             # decrypt message with the secrete key
             decrypted = "".join(chr(ord(ch) ^ self.secret_key) for ch in message)
-            print(decrypted)
+            # \r moves cursor to start of line, \033[K clears the line
+            print(f"\r\033[K{decrypted}")
+            print(f"{self.username}: ", end = "", flush = True)
 
     def write_handler(self):
 
@@ -94,12 +99,13 @@ class Client:
         """
 
         while True:
-            message = f"{self.username}: {input()}"
-
+            message = input()
+            full = f"{self.username}: {message}"
             # encrypt message with the secrete key
-            encrypted = "".join(chr(ord(ch) ^ self.secret_key) for ch in message)
-            self.s.send(encrypted.encode())
+            encrypted = "".join(chr(ord(ch) ^ self.secret_key) for ch in full)
+            self.s.send(encrypted.encode("utf-8")) # latin-1
 
 if __name__ == "__main__":
-    cl = Client("127.0.0.1", 9001, "a")
+    name = input("Enter your username: ")
+    cl = Client("127.0.0.1", 9001, name) # "a"
     cl.init_connection()
