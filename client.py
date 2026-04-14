@@ -103,7 +103,7 @@ class Client:
 
         while True:
 
-            message = input()
+            message = input(f"{self.username}: ")
             full = f"{self.username}: {message}"
             hash_value = hashlib.sha256(full.encode()).hexdigest() # compute hash
 
