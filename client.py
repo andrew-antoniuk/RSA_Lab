@@ -62,11 +62,9 @@ class Client:
         # exchange public keys
         self.s.send(f"{e},{n}".encode("utf-8"))
 
-
-
         # receive the encrypted secret key
         data = self.s.recv(1024).decode("utf-8")
-        print("Received secret:", data)
+        print("\nReceived secret key:", data)
         self.secret_key = pow(int(data), d, n)
 
         message_handler = threading.Thread(target = self.read_handler, args = ())
@@ -86,10 +84,10 @@ class Client:
             if not message:
                 break
 
-            # decrypt message with the secrete key
+            # decrypt message with the secret key
             decrypted = "".join(chr(ord(ch) ^ self.secret_key) for ch in message)
-            # \r moves cursor to start of line, \033[K clears the line
-            print(f"\r\033[K{decrypted}")
+            # \r moves cursor to start of line
+            print(f"\r{decrypted}")
             print(f"{self.username}: ", end = "", flush = True)
 
     def write_handler(self):

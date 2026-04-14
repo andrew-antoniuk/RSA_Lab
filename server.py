@@ -39,7 +39,7 @@ class Server:
             c, addr = self.s.accept()
 
             username = c.recv(1024).decode("utf-8")
-            print(f"{username} tries to connect")
+            print(f"User [{username}] tries to connect")
 
             self.username_lookup[c] = username
             self.clients.append(c)
@@ -56,7 +56,7 @@ class Server:
             c.send(str(encrypted).encode("utf-8"))
 
             sleep(0.1)
-            self.broadcast(f"new person has joined: {username}")
+            self.broadcast(f"New person has joined: {username}")
 
             threading.Thread(target = self.handle_client, args = (c, addr,)).start()
 
