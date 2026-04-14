@@ -4,6 +4,7 @@ Client part
 
 import socket
 import threading
+import hashlib
 from time import sleep
 # from math import gcd # unused
 
@@ -84,11 +85,15 @@ class Client:
             if not message:
                 break
 
-            # decrypt message with the secret key
-            decrypted = "".join(chr(ord(ch) ^ self.secret_key) for ch in message)
-            # \r moves cursor to start of line
-            print(f"\r{decrypted}")
-            print(f"{self.username}: ", end = "", flush = True)
+            hash_recv, encrypted = message.split("|", 1) # split
+            decrypted = "".join(chr(ord(ch) ^ self.secret_key) for ch in encrypted) # decrypt
+            hash_new = hashlib.sha256(decrypted.encode()).hexdigest() # new hash
+
+            if hash_new == hash_recv:
+                print(f"\r{decrypted}")
+
+            else:
+                print("\rMessage corrupted!")
 
     def write_handler(self):
 
@@ -97,11 +102,15 @@ class Client:
         """
 
         while True:
+
             message = input()
             full = f"{self.username}: {message}"
-            # encrypt message with the secrete key
+            hash_value = hashlib.sha256(full.encode()).hexdigest() # compute hash
+
+            # encrypt message with the secret key
             encrypted = "".join(chr(ord(ch) ^ self.secret_key) for ch in full)
-            self.s.send(encrypted.encode("utf-8")) # latin-1
+            packet = hash_value + "|" + encrypted# latin-1
+            self.s.send(packet.encode("utf-8"))
 
 if __name__ == "__main__":
     name = input("Enter your username: ")

@@ -4,6 +4,7 @@ Server part
 
 import socket
 import threading
+import hashlib
 from random import randint
 from time import sleep
 
@@ -67,11 +68,12 @@ class Server:
         """
 
         for client in self.clients:
-
-            # encrypt the message
             try:
-                encrypted_msg = "".join(chr(ord(ch) ^ self.secret_key) for ch in msg)
-                client.send(encrypted_msg.encode("utf-8")) # latin-1
+                hash_value = hashlib.sha256(msg.encode()).hexdigest() # hash
+                encrypted_msg = "".join(chr(ord(ch) ^ self.secret_key) for ch in msg) # encrypt
+                packet = hash_value + "|" + encrypted_msg # send
+                client.send(packet.encode("utf-8")) # latin-1
+
             except Exception:
                 self.clients.remove(client)
 
